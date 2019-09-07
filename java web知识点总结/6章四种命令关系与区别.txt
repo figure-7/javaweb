@@ -1,0 +1,33 @@
+request：服务器获取用户请求； 
+response：服务器答复用户请求的资源；
+
+
+session：用户使用服务器开始到结束的过程； 
+application：网站服务器启动到停止的过程；
+
+
+在asp中，作用域可分为四种：??
+
+①仅仅用于JSP中的page其作用域为在当前页面有效 ?（这里了解就好）
+
+②request其作用域为在当前http请求中有效?
+
+③session其作用域为在当前会话中有效??
+
+④application其作用域为在所有应用程序中有效，应用程序就是访问的网站服务器
+在上面提到了四个的作用域，作用域详细的说就是“信息共享的范围”，也就是一个信息能够在多大的范围内有效。
+
+
+
+当用户通过浏览器客户端向网站服务器提出请求时，就是一个request过程，这个时候网站服务器收到客户端的request，网站服务器通过servlet或者JSP对用户发送的request进行出理，
+处理完后服务器通过response将处理完后的资源发送给客户端，客户端收到资源在浏览器显示出来。
+
+request就是一个HTTP客户端请求，处理request可能需要多个Servlet合作， 几个Servlet之间可以通过某种方式传递信息，但这个信息在请求结束后就无效了
+
+response就是一个HTTP服务器答复，
+将servlet处理结果答复给客户端
+
+session与用户是一对一关系，一个web应用程序可以同时有多个用户在线，每个用户都有对应唯一的session，一个session就是一个用户从开始使用客户端到结束使用客户端的过程，
+这个过程可以有多个request和response
+
+application与用户是一对多关系，类似于一个web应用程序对应于多个用户在线使用，每个web应用程序对应只有一个aaplication，在一起协同工作以完成某项任务的一组 ASP 文件称作应用程序（application）。ASP 中的 Application 对象用于将这些文件捆绑在一起。application就是网站服务器从启动到停止的过程。
