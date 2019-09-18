@@ -1,0 +1,658 @@
+spring:
+IOC：
+Ioc:直接让对方创建
+
+
+
+
+
+DI：
+DI:设置给上面
+模拟service实例：BookService bookservice - new BookServiceImpl();	Ioc<beam>
+创建dao实例:BookDao bookdao = new BookDaoImpl()				IoC
+将dao设置给service：bookService.setBookDao(bookdao);			DI<property>
+<property>进行属性注入
+	name:bean的属性名，通过setter方法获得
+	setBookDao ##> BookDao ##> bookDao
+	ref:另一个bean的id值的引用
+<创建service>
+<bean id="bookServiceId" class="com.itheima.b.di.BookServiceImpl">
+	<property name="bookDao（类名）" ref="bookDaoId(实例的id)"></property>
+</bean>
+<创建dao实例>
+<bean id="bookDaoId" class="com.itemima.b.di.BookDaoImpl"></bean>
+总结：先建立Dao，然后建立service,service需要Dao，加上ref，取名为name对应名字
+
+
+
+
+
+myeclipse xml提示:
+需要联网
+
+
+
+
+
+核心API：
+BeanFactory:工厂，用于生成任意bean（延迟加载数据，调用方法时再加载）
+ApplicationContest:是BeanFactory的子接口，功能更强大（直接加载数据，获取到路径就直接加载）
+ClassPathXmlApplication:用于加载classpath下的xml
+FileSystem.XmlApplicationContest:用于加载指定文件路径下的xml
+
+
+
+
+
+bean装配于基于xml——实例化方式：
+A：静态工厂：
+常用与spring整合其他框架（工具）
+用于生成实例对象，所有方法必须是static
+<bean id="" class="工厂全限定类名" factory-method="静态方法">
+1.静态工厂：
+public class MyBeanFactory{
+	public static UserService createService() {
+		return new UserServiceImpl();
+	}
+}
+2.spring配置:
+<bean id="userServiceId" 
+      class="com.item.c_inject.b.static_factory.MyBeanFactory" 
+      factory-method="createService"></bean>
+B：实例工厂:
+1.工厂：
+public class MyBeanFactory{
+	public UserService createService() {
+		return new UserServiceImpl();
+	}
+}
+2.spring配置:
+factory-bean确定工厂实例
+factory-method确定普通方法
+<bean id="MyBeanFactoryId"
+      class="com.item.c_inject.c_factory.MyBeanFactory" ></bean>
+<bean id="userServiceId"
+      factory-bean="myBeanFactoryId"
+      factory-method="createService"></bean>
+
+
+
+
+
+
+bean装配于基于xml——bean种类：
+普通bean:之前操作都是普通bean,<bean id="" class="A">,spring直接创建A实例，并返回 
+FactoryBean:是一个特殊的bean，具有工厂生成对象能力，只能生成特定的对象
+	    bean必须使用FactoryBean接口，此接口提供方法getObject()用于获得特定bean
+	    <bean id="" class="FB">先创建FB实例，使用调用getObject()方法，并返回方法的返回值
+		FB fb = new FB()
+		return fb.getObject()
+BeanFactory和FactoryBean对比：
+	   BeanFactory:工厂，用于生产任意bean
+	   FactoryBean:特殊bean，用于生成另一个特定的bean,例如：ProxyFractoryBean,此工厂bean用于生产代理
+	   <bean id="" class="ProxyFractoryBean">获得代理对象实例，AOP使用
+
+
+
+
+
+bean装配于基于xml——作用域
+1.取值：
+singleton:单例，默认值
+prototype:多例：每执行一次getBean将获得一个实例，例如：strutsz整合spring，配置action多例
+2.配置信息：
+<bean id="" class="" scope="">
+<bean id="userServicedId" class="com.itemima.d.scope.userServicedImpl"
+	scope=prototype"></bean>
+
+
+
+
+
+bean装配于基于xml——生命周期
+生命周期：
+1.初始化和销毁方法：
+目标方法执行前后执行后，将进行初始化或销毁
+<bean id="" class="初始化方法名称" destory-method="销毁的方法名称"></bean>
+A.目标类:
+public class UserServiceImpl implements UserService {
+
+	@override
+	public void addUser() {
+		System.out.println("e lifecycle add user");
+	}
+
+	public void myInit() {
+		System.out.println("初始化");
+	}
+
+	public void myDestory() {
+		System.out.println("销毁");
+	}
+
+}
+B：spring配置：
+<bean id="userServicedId" class="com.itemima.e.lifecycle.userServicedImpl"
+	init-method="mtInit" destory-method="myDestory"></bean>
+C：测试：
+public void deemo2() throws Exception{
+	//spring工厂
+	String xmlPath = "com/itemima/e.lifecycle/beans.xml";
+	ClassPathXmlApplicationContext = new ClassPathXmlApplicationContext(xmlPath);
+	UserService userservice = (UserService) applicationContext.getBean("userServiceId");
+	userService.addUser();
+
+	//要求：1.容器必须close,销毁方法执行；2.必须是单例的
+	//applicationContext.getClass().getMethod("close").invoke(applicationContext);
+	//此方法接口中没有定义，实现类提供
+	ApplicationContext.close();
+
+}
+BeanPostProcessor：后处理Bean
+A：spring提供一种机制，只要实现此接口BeanPostProcess,并将实现类提供给spring容器
+spring容器将自动调用执行，在初始化方法前执行before()，在初始化方法后执行after()
+B:spring提供工厂钩子，用于修改实例对象，可以生成代理对象，是AOP底层
+模拟
+A a =  new A()
+a = B.before(a);	将a的实例对象传递给后处理bean，可以生成代理对象并返回
+a.init();
+a = B.after(a);
+a.addUser();		生成代理对象，目的在目标方法前后执行（例如：开启事务，提交事务）
+a.destory();
+
+
+
+
+
+编写实现类
+代码略（太难了没看懂，见视频）
+
+
+
+
+
+bean装配于基于xml——属性注入——setter方法：
+setter方法注入:
+	普通数据:
+		<property name="值">
+		等效
+		<property name="">
+			<value>值
+	引用数据:(就是嵌套使用，对另一个ref内对应id的bean内属性赋值)
+		<property name="" ref="另一个bean">
+		等效
+		property name="">
+			<ref bean="另一个bean"/>
+
+
+
+
+
+bean装配于基于xml——属性注入——p命名空间：
+对setter方法进行简化，替换<property name="属性名">，而是在
+<bean p 属性名="普通值" p:属性名ref="引用值">
+p命名空间使用前提，必须添加命名空间
+<beans  xmlns="....../beans"
+	xmlns:xsi="......"
+	xmlns:p="......(这里的...与上面的xmlns的...一致)/p"
+	xsi:schemaLocation:"......"
+<bean id="personId" class="com.itheima.f.xml.c_p.Person"
+	p:pname="宋佳兴" p:age="22"
+	p:homeAddr-ref="homeAddrId" p:companyAddr-ref="companyAddrId">
+</bean>
+
+<bean id="homeAddrId" class="com.itheima.f.xml.c_p.Address"
+	p:addr="DG" p:tel="东沟">
+</bean>
+
+<bean id="companyAddrId" class="com.itheima.f.xml.c_p.Address"
+	p:addr="DG" p:tel="岛国">
+</bean>
+
+
+
+
+
+bean装配于基于xml——属性注入——spEL：
+对<property>进行统一编程，所有的内容都使用value
+<property name="" value="#{表达式}">
+#{123},#{jack},数字，字符串
+#{beanId},另一个bean引用
+#{beanId.propName},操作数据
+#{beanId.toString()},执行方法
+#{T(类).字段|方法}，静态方法或字段
+<!--
+	<property name="cname" value="#{'jack}"></property>
+	<property name="cname" value="#{customerId.cname.toUpperCase()}"></property>
+		通过一个bean，获得属性，调用的方法
+	<property name="cname" value="#{customerId.cname?.toUpperCase()}"></property>
+		?，如果对象不为null，将调用方法
+-->
+<bean id="customerId" class="com.itemima.f_xml.d_spel.Customer">
+	<property name="cname" value="#{customerId.cname?.toUpperCase()}"></property>
+	<property name="pi" value="#{T(java.Long.Math).PI}"></property>
+</bean>
+
+
+
+
+
+bean装配于基于xml——属性注入——集合注入：
+<!--
+	集合的注入都是给<property>添加子标签
+		数组：<array>
+		List:<list>
+		Set:<set>
+		Map:<map>,map存放k/v键值对，使用<entry>描述
+		Properties:<props> <prop key=""></prop> []
+	普通数据：<value>
+	引用数据：<ref>
+-->
+<bean id="collDataId" class="com.itemima.f_xml.e_coll.CollData">
+	<property name="arrayData">
+		<array>
+			<value>DS</value>
+			<value>DZD</value>
+			<value>屌丝</value>
+		</array>
+	</property>
+	<property name="listData">
+		<list>
+			<value>DS</value>
+			<value>DZD</value>
+			<value>屌丝</value>
+		</list>
+	</property>
+	<property name="setData">
+		<set>
+			<value>DS</value>
+			<value>DZD</value>
+			<value>屌丝</value>
+		</set>
+	</property>
+	<property name="mapData">
+		<map>
+			<entry key="jack" value="杰克"></entry>
+			<entry>
+			<key><value>DS</value></key>
+				<value>屌丝</value>
+			</entry>
+		</map>
+	</property>
+	<property name="propsData">
+		<props>
+			<porp key="高富帅">嬲</prop>
+			<porp key="白富美">嬲</prop>
+			<porp key="男屌丝">鈟</prop>
+		</props>
+	</property>
+</bean>
+
+
+
+
+
+bean装配于基于注解：
+注解：就是一个类，使用@注解名称
+开发中，使用注释 取代xml配置文件
+1.@Component取代<bean class="">
+  @Component("id")取代<bean id="" class="">
+2.web开发，提供三个@Component 注解衍生注解（功能一样）<bean class="">
+  @Repository，dao层
+  @Service,service层
+  @Controller,web层
+3.依赖注入：
+	普通值：@Value("")
+	引用值：
+		方式1：按照【类型】注入
+			@Autowired
+		方式2：按照【名称】注入
+			@Autowired
+			@Qualifier("名称")
+		方式3：按照【名称】注入
+			@Resource("名称")
+4.生命周期：
+	初始化：@PostContext
+	销毁：@PreDestory
+5.作用域：
+	@Scope("prototype")多例
+public void demo02{
+	String xmlPath = "...";
+	Application applicationContext = new ClassPathApplicationContext(xmlPath);
+	studentAction studentAction = (StudentAction) applicationContext.getBean(studentActionId);
+	studentAction.execute();						       /\
+}											|
+							(bean)				|
+@Controller("studentActionId")-----------------------------------------------------------
+public class StudentAction {
+	@Autowired //默认按照类型
+	private StudentService studentService;<----------
+	public void execute() {				|
+		studentService.addStudent();		|
+	}						|
+}							|
+					(property类型（接口）)		|
+@Service----------------------------------------------------（bean）
+public class StudentServiceImpl implements StudentService {
+	private StudentDao studentDao;
+	@Autowired
+	@Qualifier("studentDaoId")<------------------------------
+	public void setStudentDao(StudentDao studentDao) {	|
+		this.studentDao = studentDao;			|
+	}							|
+	@override						|
+	public void addStudent() {				|
+		studentDao.save();				|
+	}							|
+}								|
+						(声明式按照名称)		|
+@Repository("studentDaoId")--------------------------------------
+public class StudentDaoImpl implements StudentDao {
+	@override
+	public void save() {
+		System.out.println("dao");
+	}
+}
+注解使用前提，添加命名空间，让spring扫描含有注解类
+需要将xml中对应代码用spring包下的spring-framework-reference/html/xsd-config.html中D.2.1的第二段代码替换
+
+
+
+
+
+注解和xml混合使用：
+1.将所有的bean都配置到xml中：
+	<bean id="" class="">
+2.将所有的依赖都是用注解：
+	@Autowired
+	默认不生效，为了生效，需要在xml配置<content-ammotation-config>
+总结：
+注解1：<content-component-scan base-package>
+注解2：<content-ammotation-config>
+1.一般情况两个注释不一起用。
+2.注解1扫描含有注解（@Component等）类，注入注解自动生效
+  注解2只在xml和注解（注入）混合使用时，使注入注解生效
+
+
+
+
+
+spring aop介绍：
+1.什么是AOP：
+在软件业，AOP为Aspect Oriented Programming的缩写，
+意为：面向切面编程，通过预编译方式和运行期动态代理实现程序功能的统一维护的一种技术。
+AOP是OOP的延续，是软件开发中的一个热点，也是Spring框架中的一个重要内容，
+是函数式编程的一种衍生范型。利用AOP可以对业务逻辑的各个部分进行隔离，
+从而使得业务逻辑各部分之间的耦合度降低，提高程序的可重用性，同时提高了开发的效率。
+Java只提供了单继承，因此具体访问类只能继承这个父类，如果具体访问类还要继承其它父类，比如另外一个如Worker的父类，将无法方便实现。
+重用被打折扣，具体访问类因为也包含“锁”状态之类的相关代码，只能被重用在相关有“锁”的场合，重用范围很窄。
+仔细研究这个应用的“锁”，它其实有下列特性：
+“锁”功能不是具体访问类的首要或主要功能，访问类主要功能是访问数据对象，例如读取数据或更改动作。
+“锁”功能其实是这个系统的一个纵向切面，涉及许多类、许多类的方法。如右图：
+因此，一个新的程序结构应该是关注系统的纵向切面，例如这个应用的“锁”功能，
+这个新的程序结构就是aspect（方面）
+在这个应用中，“锁”方面（aspect）应该有以下职责：
+提供一些必备的功能，对被访问对象实现加锁或解锁功能。
+以保证所有在修改数据对象的操作之前能够调用lock()加锁，在它使用完成后，
+调用unlock()解锁。
+2.AOP实现原理：
+aop底层将采用代理机制进行实现
+接口+实现类，spring采用jdk动态代理Proxy
+实现类：spring采用cglib字节码增强
+
+
+
+
+
+spring AOP术语：
+1.target:目标类，需要被代理的类
+2.Joinpoint（连接点）所谓连接点是指那些可能被拦截的方法。例如：所有的方法
+3.PointCut：切入点：已经被增强的连接点。例如：addUser()
+4.advice：通知增强，增强代码，例如：after,before
+5.Weaving（织入）是指把增强advice应用到目标对象target来创建新的代理对象proxy的过程
+6.Proxy：代理类
+7.Aspect（切面）：是切入点pointcut和通知advice的结合
+      一个线是一个特殊的面
+      一个切入点和一个通知，组成一个特殊的面
+
+
+
+
+
+spring 手动代理——jdk动态代理：
+JDK动态代理对“装饰着”设计模式简化，使用前提，必须有接口
+1.目标类：接口+实现类
+2.切面类：用于存通知MyAspect
+3.代理类：编写工厂生成代理
+4.测试：
+userService	$Proxy4 (id=35)
+1.目标类：
+public interface UserService {
+	public void adduser();
+	public void updateUser();
+	public void deleteUser();
+}
+2.切面类：
+public class MyAspect {
+	public void before(){
+		System.out.println("鸡首");
+	}
+	public void after(){
+		System.out.println("牛后");
+	}
+}
+3.工厂：
+public class MyBeanFactory{
+	public static UserService createService(){
+		final UserService userService = new UserServiceImpl();
+		final MyAspect myAspect = new MyAspect();
+		/*代理类：将目标（切入点）和切面类（通知）结合-->切面
+		*    Proxy.newProxyInstance
+		*	参数1：loader，类加载器，动态代理类 运行时创建，任何类都需要类加载器并将其加载到内存
+		*		一般情况：当前类.class.getClassLoader();
+		*			目标类实例.getClass().get...
+		*	参数2：Class[] interfaces 代理类需要实现所有接口
+		*		方式1：目标类实例.getClass().getInterfaces();注意只能获得自己接口，不能获得父元素接口
+		*		方式2：new Class[]{UserService.class}
+		*		例如：jdbc 驱动 --> DriverManager 获得接口Connection
+		*	参数3：InvocationHandle 处理类，接口，必须进行实现类，一般采用匿名内部
+		*		提供invoke方法，代理类的每一个方法执行时，都将调用一次invoke
+		*	参数31：Object proxy:代理对象
+		*	参数32：Method method:代理对象当前执行方法的描述对象（反射）
+		*		执行方法名：method.getName()
+		*		执行方法：method.invoke(对象，实际参数)
+		*	参数33：Object[] args:方法实际参数
+		*/
+		UserService proxyService = (UserService)Proxy.newProxyInstance(
+					MyBeanFactory.class.getCalssLoader(),
+					userService.getClass().getInterfaces(),
+					new InvocationHander() {
+						@override
+						public Object invoke(Object proxy, Method method, Object[] args)throws Throwable{
+							//前执行
+							myAspect.before();
+							//执行目标类的方法
+							Object obj = method.invoke(userService, args);
+							//后执行
+							myAspect.after();
+							return obj;
+						}
+					});
+		return provService;
+	}
+}}
+4.测试：
+public void demo01(){
+	UserService.userService = MyBeanFactory.createService();
+	userService.addUser();
+	userService.updateUser();
+	userService.deleteUser();
+}
+
+
+
+
+
+spring 手动代理——CGLIB字节码增强：
+没有接口，只有实现类
+采用字节码增强框架cglib，在运行时，创建目标类的子类，从而对目标类进行增强
+需导入jar包
+工厂类：
+public class MyBeanFactory{
+	public static UserServiceImpl createService(){
+		//1目标类
+		final UserService userService = new UserServiceImpl();
+		//2切面类
+		final MyAspect myAspect = new MyAspect();
+		//3代理类，采用cglib,就是创建目标类的子类
+		//3.1核心类
+		Enhancer enhancer = new Enhancer();
+		//3.2确定父类
+		enhancer,setSuperclass(userService.getClass());
+		/* 3.3设置回调函数，MethodInterceptor接口等效jdk InvocationHander窗口
+		*   intercept() 等效jdk  invoke()
+		* 	参数1，参数2，参数3：以invoke一样
+		*	参数4：methodProxy 方法的代理
+		*/
+		enhancer.setCallback(new MethodInterceptor(){
+			@override
+			public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)throwable{
+				//前
+				myAspect.before();
+				//执行目标类的方法
+				Object obj = method.invoke(userService, args);
+				//执行代理类的父类，执行目标类（目标类和代理类 父子关系）
+				methodProxy.invokeSuper(proxy,args);
+				//后
+				yAspect.after();
+				return obj;
+			}
+		});
+		//3.4创建代理
+		UserService proxService = (UserServiceImpl) enhancer.create();
+		return proxService;
+	}
+}
+spring工厂bean代理——半自动：
+让spring创建代理对象，从spring容器中手动的获取代理对象
+导入jar包
+核心4+1
+AOP，AOP联盟（规范），spring-aop(实现)
+/*采用“环绕通知”MethodInterceptor
+*/
+1.目标类：
+public interface UserService {
+	public void adduser();
+	public void updateUser();
+	public void deleteUser();
+}
+2.切面类：
+public class MyAspect implements MethodInterceptor {
+	@override
+	public Object invoke(MethodInvocation mi) throws Throwable {
+		System.out.println("前3");
+		//手动执行目标方法
+		Object obj = mi.proceed();
+		System.out.println("后3");
+		return obj;
+	}
+}
+3.spring配置：
+<!--1.创建目标类-->
+	<bean id="userserviceId"
+class="...userServiceImpl"></bean>
+<!--2.创建切面类-->
+<bean id="myAspectId" class="...myAspect"></bean>
+<!--3.创建代理类
+	使用工厂bean FactoryBean，底层使用getObject()，返回特殊bean
+	ProxyFactoryBean用于创建代理工厂bean，生成特殊代理对象
+	  interfaces：确定接口们
+		通过<array>可以设置多个值
+		只有一个值时，value=""
+	  target:确定目标类
+	  interceptorNames:通知切面类的名称，类型String[]，如果设置一个值value=""
+	  optimize:强制使用cglib
+		<property name="optimize" value="true"></property>
+	联盟机制
+	  如果目标类接口，采用jdk动态代理
+	  如果没有接口，采用cglib字节码增强
+	  如果声明opyimize = true,无论是否有接口，都采用cglib
+-->
+<bean id="proxyServiceId" class="...ProxyFactoryBean">
+	<property name="interfaces" value="...UserService"></property>
+	<property name="target" ref="UserServiceId"></property>
+	<property name="interceptorNames" value="myAspectId"></property>
+</bean>
+4.测试：
+public void demo01(){
+	String xmlPath = "...";
+	ApplicationContext applicationContext = new ClassPathApplicationContext(xmlPath);
+	UserService userService = (UserService) applicationContext.getBean(proxyServiceId);
+	userService.addUser();
+	userService.updateUser();
+	userService.deleteUser();
+}
+
+
+
+
+
+spring aop编程：
+从spring容器获得目标类，如果配置aop,spring将自动生成代理
+要确定目标类，aspectJ切入点表达式，导入jar包
+spring配置：
+<beans  xmlns="....../beans"
+	xmlns:xsi="......"
+	xmls:aop="......"
+	xsi:schemaLocation:"......
+			    ......
+			    ......aop
+			    ......spring-aop.xsd">
+<!--1.创建目标类-->
+	<bean id="userserviceId"
+class="...userServiceImpl"></bean>
+<!--2.创建切面类-->
+<bean id="myAspectId" class="...myAspect"></bean>
+<!--3.aop编程
+	3.1导入命名空间
+	3.2使用<aop:config>进行配置
+		proxy-target-class="true"声明时使用cglib代理
+	<aop:pointcut>切入点，从目标对象获得具体方法
+	<aop:advisor>特殊的切面，只有一个通知和一个切入点
+		advice-ref：通知引用
+		pointcut-ref：切入点引用
+	3.3切入点表达式
+		execution(* com.itheima.c_spring_aop.*.*(..))
+		选择方法	返回值任意	包
+类名任意	方法名任意	参数任意
+	-->
+	<aop:config proxy-target-calss="true">
+		<aop:pointcut expression="execution(* com.itheima.c_spring_aop.*.*(..))"
+id="myPiointCut"/>
+		<aop:advisor advice-ref="myAspectId" pointcut-ref="myPointCut"/>
+	</aop:config>
+
+
+
+
+
+aspectJ介绍及切入点表达式：
+介绍：
+AspectJ是一个面向切面的框架，它扩展了Java语言。
+AspectJ定义了AOP语法，它有一个专门的编译器用来生成遵守Java字节编码规范的Class文件。
+主要用途：自定义开发
+切入点表达式：
+1.execution（）：用于描述方法
+	语法：execution（修饰符 返回值 包.类.方法（参数）throws异常）
+		修饰符：一般省略
+			public	公共方法
+			*	任意
+		返回值
+			void	返回没有值
+			String	返回值字符串
+			*	任意
+		包，{省略}
+			com.itheima.cnn			固定包
+			com.itheima.cnn.*.service	cnn包下面的子包任意（例如：com.itheima.cnn.staff.service）
+			com.itheima.cnn			cnn包下面的所有子包（含自己）
+			com.itheima.cnn.*.service..	cnn包下面任意子包，固定目录service,service目录任意包
