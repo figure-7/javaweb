@@ -1,0 +1,213 @@
+语句书写格式select - from - where - group by - having - order by - limit 0，n
+                   列     表     条件       分组     筛选       排序    限制起始位置开始的n个数据     
+语句执行顺序from - where - group by - having - select - order by - limit
+
+CREATE DATABASE mydb2
+USE mydb2
+//创建数据库并对其进行操作
+Ctrl+Shift+Q可以执行SQL脚本（包含SQL语句的TXT文件）
+
+SELECT * FROM emp_e
+INNER JOIN emp e
+ON e.dempo = d.dempo
+连接查询
+
+SELECT * FROM emp_e
+LEFT OTTER JOIN emp e
+ON e.dempo = d.dempo
+WHERE e.empno IS NULL
+左连接查询（主表emp_e）
+
+SELECT.....WHERE sal>ALL(SELECT sal.....WHERE......).
+子查询（用括号即可）
+
+CREATE USER 'zhangsan'@'localhost' IDENTIFIED BY '123'
+（工作中数据库数据十分重要，不能用高授权账户root等，数据易泄露）
+但是这样值添加用户仅可以查看数据库，无权限修改（CMD指令中是这样，数据库中可能会直接授权）
+
+GRANT ALL ON school.* TO 'zhangsan'
+现在zhangsan可以操作school数据库表了
+
+REMOVE ALL ON school.* TO 'zhangsan'
+现在zhangsan不可以操作school数据库表了
+
+DROP USER 'zhangsan'
+删除该用户
+
+jQuery可以将下载的js文件调用实现，或者用网上的网址链接调用
+
+jQuery可以实现n个函数，简写
+$(function(){
+        .....
+    });
+
+$()为jQuery
+${}为EL表达式，注意别弄混
+
+
+
+dblclick为添加双击事件
+导入jQuery语句<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>，就不用导包了
+mouseover鼠标经过执行
+mouseout鼠标离开执行
+$("#tab tr")表示取得tab标签下的tr标签内容进行操作，与Python爬虫取标签同理
+hover函数可以使现鼠标经过和离开两个函数
+focus函数可以实现对制定标签下框内设置点击事件，并通过blur函数恢复
+
+
+
+hide（）函数做隐藏，show（）函数做显示，toggle（）函数可以实现点击时隐藏显示切换，括号内可以设置时间
+fadeOut（）为淡出，fadeIn（）为淡入，fadeToggle（）可以实现点击时淡入淡出显示切换
+fadeTo(时间,0.5);//0表示透明，1表示不透明
+slideDown（）滑出，slideUp（）滑入
+jQuery一般编程风格是链式编程，例如
+$("p").show()
+      .css("color","blue")
+      .css("fontSize","30px")；
+
+jQueryDom操作：
+修改div中内容用html()方法实现
+通过var定义变量获取内容
+通过val()方法可直接给对应标签设置值
+获取属性用attr()，改变属性可以用attr("标签类型","修改内容")进行修改
+
+
+
+全选操作：
+attr();--->prop()都是全选操作方法，具体根据不同版本，旧版本（1.0之前）用attr()，新版本用prop()
+prop(...,true)可以设置为选中状态，prop(...,false)可以设置为非选中状态
+
+each方法：
+append（）方法在标签尾插入
+prepend（）方法在标签前插入
+remove()方法删除是附带父元素删除，empty()方法删除是子元素删除
+for(var i=0;i<$("div").length;i++) {}可以进行简单遍历，length方法对应长度
+$("div").[i]代表第i个元素值(dom对象)
+$("div").eq(i)代表第i个元素值(jQuery对象)
+each(function (i,n)也可以实现元素遍历
+
+CSS操作：
+addClass()方法实现CSS样式添加
+removeClass()方法实现CSS样式删除
+toggleClass()方法实现CSS样式切换
+
+省市级联：
+console.log（）方法可以实现显示标签内容
+$("#prov").append("<option value='"+k+"'>"+k+"</option>>")中k不能再""内，要隔开
+change（）方法可以实现标签内容转换
+
+
+
+jQuery节点关系：
+parents()方法可以实现取到该标签有几个父标签
+parent()方法可以实现取到该标签的最近父标签
+children()方法可以实现取到该标签有几个子标签
+find()方法可以实现取到该标签从子辈中查找
+siblings()方法可以实现取到该标签有几个兄弟标签
+
+jQueryAjax：
+jQueryAjax的GET模式：
+$.ajax({
+      url:"change",//地址
+      type:"GET",//请求方式
+      dataType:"text",//期望服务器的返回类型
+      success:function (data) {//成功连接后操作
+          alert(data);
+      }
+})
+
+
+
+jQueryAjax的POST模式：
+$.ajax({
+       url:"change",//地址
+       type:"POST",//请求方式
+       dataType:"text",//期望服务器的返回类型
+       data:"username=zhangsan&password=888",//发送的数据
+       contentType:"application/x-www-form-urlencoded",//告诉服务器数据类型
+       success:function (data) {//成功连接后操作
+       	  alert(data);
+       }
+})
+
+jQueryAjax2：
+jQueryAjax的加载数据模式：
+$(function () {
+            $("#btn1").click(function () {
+                $("#box").load("change",{"id":888,"name":"zhangsan"});
+            });
+jQueryAjax的GET模式2：
+$("#btn2").click(function () {
+                $.get("change",{"id":888,"name":"zhangsan"},function (data) {
+                    $("#box").html(data.id+"..."+data.name+"..."+data.age);
+                },"json");
+            });
+jQueryAjax的POST模式2：
+$("#btn3").click(function () {
+                $.post("change",{"username":"hahaha","password":"99999"},function (data) {
+                },"text");
+            });
+
+jQuery让渡：
+noConflict()方法可以实现jQuery让渡（防止$标签冲突）
+也可以用(function ($) {    })(jQuery);限制$作用域
+
+validate校验：
+validate校验相比于直接AJAx或单纯jQUERYAJAX要简单的多
+使用时先导入jQuery，在导入validate，最后导入国际化库。
+$("#formId").validate({
+	rules:{
+		username:"required",//不能为空
+		password:{
+			required:true,
+			digits:true//只能是数字
+		},
+		repassword:{
+			required:true,
+			digits:true,
+			equalTo:"#password"//判断相等（取id，方式与jQuery同）
+		}
+		minvalue:{
+			min:10//最小值限制
+		}
+		qujian:{
+			range:[5,10]//数字范围
+		}
+	},//校验规则
+	messages:{
+		username:"用户名不能为空",
+		password:{
+			required:"密码不能为空",
+			digits:"密码只能是数字"
+		},	
+		repassword:{
+			required:"密码不能为空",
+			digits:"密码只能是数字",
+			equalTo:"两次密码必须相同"
+		}
+		minvalue:{
+			min:"数字最小值为{0}"//{0}代表取到上面的值
+		}
+		qujian:{
+			range:"数字必须在{0}和{1}"
+		}			
+	}//提示信息
+})
+
+
+
+bookstrap容器和栅格系统：
+下载地址及调用方式见编程通用文件夹
+功能主要为移动设备优先，适应各个屏幕大小，包括手机！！
+container-fiuld的class对应为屏幕适配效果
+container相反不进行适配屏幕处理
+
+
+
+md：大于992占一份
+col-md-1：md后面数字是几就占屏幕的几份
+col-md-4 col-sm-6：可以设置小屏幕时占6份，大屏幕时占6份
+超小屏幕用ss（一般不会使用）
+
+全局CSS：
+bookstrap中class="text-center"可以直接实现居中
