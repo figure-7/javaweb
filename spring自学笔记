@@ -656,3 +656,65 @@ AspectJ定义了AOP语法，它有一个专门的编译器用来生成遵守Java
 			com.itheima.cnn.*.service	cnn包下面的子包任意（例如：com.itheima.cnn.staff.service）
 			com.itheima.cnn			cnn包下面的所有子包（含自己）
 			com.itheima.cnn.*.service..	cnn包下面任意子包，固定目录service,service目录任意包
+		类，{省略}
+			UserServiceImpl			指定类
+			*Impl				以impl结尾
+			User*				以User开头
+			*				任意
+		方法，不能省略
+			addUser				固定方法
+			add*				以impl开头
+			*Do				以Do结尾
+			*				任意
+		(参数)
+			（）				无参
+			（int）				一个整型
+			（int int）			两个
+			（..）				参数任意
+		throws,可省略，一般不写
+综合1：
+	execution(* com.itheima.crm.*.service..*.*(..))
+综合2：
+	<aop:pointcut expression="execution(* com.itheima.*WebConmmit.*(..)) execution(* com.itheima.*Service.*(..))" id="myPiointCut"/>
+
+
+
+
+
+aspectJ通知类型：
+aop联盟定义通知类型，具有特性接口，必须实现，从而确定方法名称
+aspectJ通知类型，只定义类型名称，已经方法格式
+个数：6种，知道5种，掌握1种
+before前置通知，各种校验
+	在方法前执行，如果通知抛出异常，阻止方法运行
+afterReturning后置通知执行（应用，常规数据处理）
+	方法正常返回后执行，如果方法中抛出异常，通知无法执行
+	必须在方法执行后才执行，所以可以获得方法的返回值
+around环绕通知（应用，十分强大，可以做任何事）
+	方法执行前后分别执行，可以阻止方法的执行
+	必须手动执行目标方法
+afterThrowing抛出异常通知（应用，包装异常通知）
+	方法抛出异常后执行，如果方法吗，没有抛出异常，无法执行
+after最终通知（应用，清理现场）
+	方法执行完毕后执行，无论方法中是否出现异常
+环绕
+try{
+	//前置：before
+	//手动执行目标方法
+	//后置：afterReturning
+}catch（）{
+	//抛出异常：afterThrowing
+}finally{
+	//最终：after
+}
+导入jar包 4个
+aop联盟实现
+spring aop实现
+aspect规范
+spring aspect实现
+
+
+
+
+
+aspectJ基于XML显示：
