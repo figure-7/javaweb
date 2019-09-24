@@ -809,3 +809,73 @@ B.spring配置：
 
 
 aspectJ基于注解显示：
+1.替换bean:
+@Service("userServiceId")替换上面xml里目标类语句
+@Component替换上面xml里切面类语句
+注意，扫描：
+在xml的beans里加上xml:context="...context"
+后边xml:schemaLocation加上...spring-context.xsd
+<!--扫描 注解类-->
+<context:component-scan 
+base-package="com.itheima.d_aspect.b_anno"></context:component-scan>
+2.替换aop:
+必须进行aspectj自动代理
+<!--2.确定aop注解生效-->
+<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+声明切面：
+<aop:aspect ref="myAspectId">
+@Component
+@aspect
+public class MyAspect {
+替换前置通知：
+<aop:before method="myBefore" pointcut="execution(*
+ com.itemima.d_aspect.b_anno.UserServiceImpl).*(..))">
+//切入点当前有效
+@before("execution(* com.itemima.d_aspect.b_anno.UserServiceImpl).*(..))")
+public void myBefore(JoinPoint joinPoint) {
+	System.out.println("前置通知" + joinPoint.getSignature().getName());
+}
+替换公共切入点：
+<aop:pointcut expression="execution(*
+ com.itemima.d_aspect.b_anno.UserServiceImpl).*(..)) id="myPointCut"/>
+替换后置：
+<aop:after_returning method="myAfterRerurning" pointcut-ref="myPointcut" returning="ret"/>
+@Pointcut("execution(* com.itemima.d_aspect.b_anno.UserServiceImpl).*(..)")
+private void myPointCut(){<----相当于引用
+}			       |
+@AfterReturning(value="myPointCut()" ,returning="ret")
+public void myAfterReturning(JoinPoint joinPoint,Object ret) {
+	System.out.println("后置通知" + joinPoint.getSignature().getName()+",-->"+ret);
+}
+替换环绕：
+<aop:around method="myAround" pointcut-ref="myPointCut"/>
+@Around(value="myPointCut()")
+public Object my....{
+替换抛出异常：
+<aop:after-throwing method="myAfterThrowing" pointcut="execution(* 
+com.itemima.d_aspect.b_anno.UserServiceImpl).*(..)" throwing="e"/>
+@AfterThrowing(value="execution(* 
+com.itemima.d_aspect.b_anno.UserServiceImpl).*(..)" ,throwing="e")
+	public void myAfterThrowing.....{
+3.切面类：
+上面代码综合即可（略）
+4.spring配置：
+<!--扫描 注解类-->
+<context:component-scan 
+base-package="com.itheima.d_aspect.b_anno"></context:component-scan>
+5.aop注解总结：
+@Aspect 声明切面，修饰切面类，从而获得 通知
+通知：
+	@Before 前置
+	@AfterReturning 后置
+	@Around 环绕
+	@AfterThrowing 抛出异常
+	@After 最终
+切入点：
+	@PointCut 修饰方法 private void xxx(){} 之后通过“方法名”获得切入点引用
+
+
+
+
+
+JdbcTemplate详解：
