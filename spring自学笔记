@@ -879,3 +879,95 @@ base-package="com.itheima.d_aspect.b_anno"></context:component-scan>
 
 
 JdbcTemplate详解：
+spring提供用于操作JDBC工具类，类似：DBYtils
+依赖连接池DataSource（数据源）
+1.创建表：
+（SQL语句略，都学过，直接右键也行）
+2.导入jar包：
+基本四个
++MySQL-connector-java-版本-bin.jar(驱动包)
++spring-jdbc-版本-RELEASE.jar(springjdbc开发包)
++spring-tx-版本-RELEASE.jar事务包
+2.1.Javabean：
+（和Javaweb的一样：略）
+2.2.使用API（了解）：
+public static void main(String[] args) {
+	//创建数据源（连接池）dbcp
+	BasicDataSource dataSource = new BasicDataSource();
+	//基本四项
+	dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+	dataSource.setUrl("jdbc:mysql://localhost:3306/ee19_spring_day02");
+	dataSource.setUsername("root");
+	dataSource.setPassword("1234");
+	//创建模板
+	JdbcTemplate jdbctemple = new JdbcTemplate();
+	JdbcTemplate.setDataSource(dataSource);
+	//通过api操作
+	jdbcTemplate.update("insert into t_user(username,password)values(?,?);","tom","998");
+}
+3.配置DBCP：
+<!--创建数据库-->
+<bean id="dataSourceId" class="org.apache.commons.dbcp.BasicDataSource">
+	<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+	<property name="username" value="root"></property>
+	<property name="url" value="jdbc:mysql://localhost:3306/ee19_spring_day02"></property>
+	<property name="password" value="1234"></property>
+</bean>
+<!--创建模板，需要注入数据源-->
+<bean id="jdbcTemplateId" class="org.springframework.jdbc.core.JdbcTemplate">
+	<property name="dataSource" ref="dataSourceId"></property>
+</bean>
+<!--配置dao-->
+<bean id="userDaoId" class="com.itheima.c_dbcp.UserDao">
+	<property name="jdbcTemplate" ref="jdbcTemplateId"></property>
+</bean>
+4.配置C3P0：
+<bean id="dataSourceId" class="ComboPooleDataSource">
+	<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+	<property name="user" value="root"></property>
+	<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/ee19_spring_day02"></property>
+	<property name="password" value="1234"></property>
+</bean>
+5.使用JdbcDaoSupport：
+5.1.dao层：
+public class UserDao extends JdbcDaoSupport{
+	public void update(User user){
+		String sql = "update...";
+		Object[] args = {user.getUsername,user.getPassword(),user.getId()};
+		this.getJdbcTemplate().update(sql, args);
+	}
+}
+5.2.spring配置文件：
+<!--配置dao
+	* dao 继承-->jdbcDaoSupport,之后只要注入数据源，底层将自动创建模板
+<bean id = "userDaoId" class="com.itheima.e_jdbcdaosupport.UserDao">
+	<property name="dataSource" ref="dataSourceId"></property>
+</bean>
+5.3.源码分析：
+通过数据源创建模板
+6.配置propertoes：
+6.1.properties文件：
+jdbc.driverClass=com.mysql.jdbc.Driver
+jdbc.user=root
+jdbc.jdbcUrl=jdbc:mysql://localhost:3306/ee19_spring_day02
+jdbc.password=1234
+6.2.spring配置：
+<!--加载配置文件
+	"classpath:"前缀表示src下
+	在配置文件之后通过${key}获得内容
+-->
+<context:property-placeholder 
+location="classpath:com/itheima/f_properties/jdbcInfo.properties"/>
+<!--创建数据源 c3p0-->
+<bean id="dataSourceId" class="com.mchange.v2.c3p0.ComboPooleDataSource">
+	<property name="driverClass" value="${jdbc.driverClass}"></property>
+	<property name="user" value="${jdbc.user}"></property>
+	<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+	<property name="password" value="${jdbc.password}"></property>
+</bean>
+
+
+
+
+
+spring事务管理介绍1--管理器，状态：
